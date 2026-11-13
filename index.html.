@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendPro | Attendance Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-icon">A</span>
+                <h2>AttendPro</h2>
+            </div>
+
+            <p class="menu-label">MAIN MENU</p>
+
+            <nav>
+                <a href="#dashboard" class="active">Dashboard</a>
+                <a href="#students">Students</a>
+                <a href="#attendance">Attendance</a>
+                <a href="#reports">Reports</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Attendance Management</p>
+                <small>Version 1.0</small>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="topbar">
+                <div>
+                    <p class="welcome">WELCOME BACK</p>
+                    <h1>Attendance Dashboard</h1>
+                </div>
+
+                <div class="admin-profile">
+                    <div class="avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <small>System Manager</small>
+                    </div>
+                </div>
+            </header>
+
+            <section class="date-section">
+                <div>
+                    <h2>Overview</h2>
+                    <p>Monitor and manage student attendance.</p>
+                </div>
+                <div class="today-date" id="todayDate"></div>
+            </section>
+
+            <section class="stats-grid" id="dashboard">
+
+                <div class="stat-card blue">
+                    <p>Total Students</p>
+                    <h2 id="totalStudents">0</h2>
+                    <span>Registered students</span>
+                </div>
+
+                <div class="stat-card green">
+                    <p>Present Today</p>
+                    <h2 id="presentStudents">0</h2>
+                    <span>Students present</span>
+                </div>
+
+                <div class="stat-card red">
+                    <p>Absent Today</p>
+                    <h2 id="absentStudents">0</h2>
+                    <span>Students absent</span>
+                </div>
+
+                <div class="stat-card orange">
+                    <p>Attendance Rate</p>
+                    <h2 id="attendanceRate">0%</h2>
+                    <span>Today's attendance</span>
+                </div>
+
+            </section>
+
+            <section class="content-card" id="students">
+                <div class="section-heading">
+                    <div>
+                        <h2>Register Student</h2>
+                        <p>Add a new student to the system.</p>
+                    </div>
+                </div>
+
+                <form id="studentForm">
+                    <div class="form-group">
+                        <label for="studentName">Full Name</label>
+                        <input type="text" id="studentName"
+                            placeholder="Enter student name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentId">Student ID</label>
+                        <input type="text" id="studentId"
+                            placeholder="Enter student ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentClass">Class / Department</label>
+                        <input type="text" id="studentClass"
+                            placeholder="Enter class or department" required>
+                    </div>
+
+                    <button type="submit" class="primary-btn">
+                        + Add Student
+                    </button>
+                </form>
+            </section>
+
+            <section class="content-card" id="attendance">
+                <div class="section-heading">
+                    <div>
+                        <h2>Attendance Records</h2>
+                        <p>Mark and monitor student attendance.</p>
+                    </div>
+                </div>
+
+                <div class="table-controls">
+                    <input type="search" id="searchStudent"
+                        placeholder="Search student...">
+
+                    <input type="date" id="attendanceDate">
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Student ID</th>
+                                <th>Class</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="attendanceList">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-card" id="reports">
+                <div class="section-heading">
+                    <div>
+                        <h2>Attendance Reports</h2>
+                        <p>Summary of today's attendance.</p>
+                    </div>
+                </div>
+
+                <div id="reportSummary">
+                    No attendance records available yet.
+                </div>
+            </section>
+
+            <footer>
+                <p>AttendPro © 2026 | Attendance Management System</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
