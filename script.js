@@ -1,9 +1,9 @@
 
 // ==========================================
-// ATTENDPRO - SUPABASE CONNECTION
+// ATTENDPRO - COMPLETE SUPABASE SYSTEM
 // ==========================================
 
-// 1. ADD YOUR SUPABASE DETAILS HERE
+// YOUR SUPABASE DETAILS
 const SUPABASE_URL = "https://ikprexvsshalwtkpvxdg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_f506hHM7Di4uiLGfSGmKHw_SoDHAuS5";
 
@@ -12,12 +12,12 @@ const db = window.supabase.createClient(
     SUPABASE_KEY
 );
 
-// Application data
+// APPLICATION DATA
 let students = [];
 let attendanceRecords = {};
 let attendanceChart = null;
 
-// HTML elements
+// HTML ELEMENTS
 const loginScreen = document.getElementById("loginScreen");
 const appContainer = document.getElementById("appContainer");
 const loginForm = document.getElementById("loginForm");
@@ -25,9 +25,13 @@ const loginMessage = document.getElementById("loginMessage");
 const studentForm = document.getElementById("studentForm");
 const attendanceDate = document.getElementById("attendanceDate");
 
-// Today's date
+// ==========================================
+// 1. DATE FUNCTIONS
+// ==========================================
+
 function getToday() {
     const date = new Date();
+
     return [
         date.getFullYear(),
         String(date.getMonth() + 1).padStart(2, "0"),
@@ -46,7 +50,7 @@ document.getElementById("todayDate").textContent =
 attendanceDate.value = getToday();
 
 // ==========================================
-// 2. LOGIN
+// 2. ADMIN LOGIN
 // ==========================================
 
 loginForm.addEventListener("submit", async function(e) {
@@ -93,6 +97,7 @@ async function showDashboard(user) {
 document.getElementById("logoutButton").addEventListener(
     "click",
     async function() {
+
         const { error } = await db.auth.signOut();
 
         if (error) {
@@ -103,6 +108,11 @@ document.getElementById("logoutButton").addEventListener(
         students = [];
         attendanceRecords = {};
 
+        if (attendanceChart) {
+            attendanceChart.destroy();
+            attendanceChart = null;
+        }
+
         appContainer.hidden = true;
         loginScreen.hidden = false;
         loginForm.reset();
@@ -110,21 +120,22 @@ document.getElementById("logoutButton").addEventListener(
 );
 
 // ==========================================
-// 5. LOAD DATABASE RECORDS
+// 5. LOAD STUDENTS
 // ==========================================
 
 async function loadData() {
-    const { data: studentData, error: studentError } =
-        await db.from("students")
-            .select("id, student_id, full_name, student_class")
-            .order("created_at", { ascending: false });
 
-    if (studentError) {
-        alert("Could not load students: " + studentError.message);
+    const { data, error } = await db
+        .from("students")
+        .select("id, student_id, full_name, student_class")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        alert("Could not load students: " + error.message);
         return;
     }
 
-    students = studentData.map(student => ({
+    students = data.map(student => ({
         dbId: student.id,
         id: student.student_id,
         name: student.full_name,
@@ -139,9 +150,11 @@ async function loadData() {
 // ==========================================
 
 async function loadAttendance() {
+
     const date = attendanceDate.value || getToday();
 
-    const { data, error } = await db.from("attendance")
+    const { data, error } = await db
+        .from("attendance")
         .select("student_id, attendance_date, status")
         .eq("attendance_date", date);
 
@@ -157,20 +170,27 @@ async function loadAttendance() {
     });
 
     displayStudents();
+
+    await loadAttendanceChart();
 }
 
 // ==========================================
-// ATTENDANCE ANALYTICS - LAST 7 DAYS
+// 7. ATTENDANCE ANALYTICS CHART
 // ==========================================
 
 async function loadAttendanceChart() {
+
     const canvas = document.getElementById("attendanceChart");
 
-    if (!canvas || !window.Chart) return;
+    if (!canvas || !window.Chart) {
+        console.error("Chart.js or attendance chart canvas is missing.");
+        return;
+    }
 
     const dates = [];
 
     for (let i = 6; i >= 0; i--) {
+
         const date = new Date();
         date.setDate(date.getDate() - i);
 
@@ -190,7 +210,7 @@ async function loadAttendanceChart() {
         .lte("attendance_date", dates[6]);
 
     if (error) {
-        console.error("Chart error:", error.message);
+        console.error("Chart loading error:", error.message);
         return;
     }
 
@@ -220,9 +240,12 @@ async function loadAttendanceChart() {
     }
 
     attendanceChart = new Chart(canvas, {
+
         type: "line",
+
         data: {
             labels: labels,
+
             datasets: [
                 {
                     label: "Present",
@@ -242,14 +265,17 @@ async function loadAttendanceChart() {
                 }
             ]
         },
+
         options: {
             responsive: true,
             maintainAspectRatio: false,
+
             plugins: {
                 legend: {
                     position: "top"
                 }
             },
+
             scales: {
                 y: {
                     beginAtZero: true,
@@ -263,10 +289,11 @@ async function loadAttendanceChart() {
 }
 
 // ==========================================
-// 7. REGISTER STUDENT
+// 8. REGISTER STUDENT
 // ==========================================
 
 studentForm.addEventListener("submit", async function(e) {
+
     e.preventDefault();
 
     const name = document.getElementById("studentName").value.trim();
@@ -279,35 +306,50 @@ studentForm.addEventListener("submit", async function(e) {
     }
 
     const submitButton = studentForm.querySelector(
-        'button[type="submit"]'
+        'button[type="submit"], button:not([type])'
     );
 
-    submitButton.disabled = true;
-    submitButton.textContent = "Saving...";
-
-    const { error } = await db.from("students").insert([{
-        student_id: id,
-        full_name: name,
-        student_class: studentClass
-    }]);
-
-    submitButton.disabled = false;
-    submitButton.textContent = "+ Add Student";
-
-    if (error) {
-        alert("Could not register student: " + error.message);
-        return;
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Saving...";
     }
 
-    studentForm.reset();
+    try {
 
-    await loadData();
+        const { error } = await db
+            .from("students")
+            .insert([{
+                student_id: id,
+                full_name: name,
+                student_class: studentClass
+            }]);
 
-    alert("Student registered successfully!");
+        if (error) {
+            alert("Could not register student: " + error.message);
+            return;
+        }
+
+        studentForm.reset();
+
+        await loadData();
+
+        alert("Student registered successfully!");
+
+    } catch (error) {
+
+        alert("Something went wrong: " + error.message);
+
+    } finally {
+
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "+ Add Student";
+        }
+    }
 });
 
 // ==========================================
-// 8. GET ATTENDANCE STATUS
+// 9. GET ATTENDANCE STATUS
 // ==========================================
 
 function getRecord(studentDbId) {
@@ -315,22 +357,25 @@ function getRecord(studentDbId) {
 }
 
 // ==========================================
-// 9. MARK ATTENDANCE
+// 10. MARK ATTENDANCE
 // ==========================================
 
 async function markAttendance(studentDbId, status) {
+
     const date = attendanceDate.value || getToday();
 
-    const { error } = await db.from("attendance").upsert(
-        [{
-            student_id: studentDbId,
-            attendance_date: date,
-            status: status
-        }],
-        {
-            onConflict: "student_id,attendance_date"
-        }
-    );
+    const { error } = await db
+        .from("attendance")
+        .upsert(
+            [{
+                student_id: studentDbId,
+                attendance_date: date,
+                status: status
+            }],
+            {
+                onConflict: "student_id,attendance_date"
+            }
+        );
 
     if (error) {
         alert("Could not save attendance: " + error.message);
@@ -341,12 +386,13 @@ async function markAttendance(studentDbId, status) {
 }
 
 // ==========================================
-// 10. DISPLAY STUDENTS
+// 11. DISPLAY STUDENTS
 // ==========================================
 
-displayStudents();
-await loadAttendanceChart();{
+function displayStudents() {
+
     const list = document.getElementById("attendanceList");
+
     const search = document.getElementById("searchStudent")
         .value.toLowerCase();
 
@@ -359,6 +405,7 @@ await loadAttendanceChart();{
     );
 
     filteredStudents.forEach(student => {
+
         const status = getRecord(student.dbId);
 
         const row = document.createElement("tr");
@@ -376,25 +423,31 @@ await loadAttendanceChart();{
         });
 
         const statusCell = document.createElement("td");
+
         statusCell.textContent = status;
+
         statusCell.className =
             "status-" + status.toLowerCase().replace(" ", "-");
 
         const actionCell = document.createElement("td");
 
         const presentButton = document.createElement("button");
+
         presentButton.textContent = "Present";
         presentButton.className = "primary-btn";
         presentButton.type = "button";
+
         presentButton.addEventListener("click", () =>
             markAttendance(student.dbId, "Present")
         );
 
         const absentButton = document.createElement("button");
+
         absentButton.textContent = "Absent";
         absentButton.className = "primary-btn";
         absentButton.type = "button";
         absentButton.style.background = "#dc2626";
+
         absentButton.addEventListener("click", () =>
             markAttendance(student.dbId, "Absent")
         );
@@ -402,6 +455,7 @@ await loadAttendanceChart();{
         actionCell.append(presentButton, absentButton);
 
         row.append(statusCell, actionCell);
+
         list.appendChild(row);
     });
 
@@ -409,10 +463,11 @@ await loadAttendanceChart();{
 }
 
 // ==========================================
-// 11. DASHBOARD STATISTICS
+// 12. DASHBOARD STATISTICS
 // ==========================================
 
 function updateStatistics() {
+
     const present = students.filter(
         student => getRecord(student.dbId) === "Present"
     ).length;
@@ -429,8 +484,11 @@ function updateStatistics() {
         : 0;
 
     document.getElementById("totalStudents").textContent = total;
+
     document.getElementById("presentStudents").textContent = present;
+
     document.getElementById("absentStudents").textContent = absent;
+
     document.getElementById("attendanceRate").textContent = rate + "%";
 
     document.getElementById("reportSummary").textContent =
@@ -438,7 +496,7 @@ function updateStatistics() {
 }
 
 // ==========================================
-// 12. SEARCH AND DATE FILTER
+// 13. SEARCH AND DATE FILTER
 // ==========================================
 
 document.getElementById("searchStudent").addEventListener(
@@ -449,10 +507,11 @@ document.getElementById("searchStudent").addEventListener(
 attendanceDate.addEventListener("change", loadAttendance);
 
 // ==========================================
-// 13. CHECK EXISTING LOGIN SESSION
+// 14. CHECK EXISTING LOGIN SESSION
 // ==========================================
 
 async function initializeApp() {
+
     const { data, error } = await db.auth.getSession();
 
     if (error) {
