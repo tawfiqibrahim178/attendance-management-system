@@ -5,7 +5,7 @@
 
 // 1. ADD YOUR SUPABASE DETAILS HERE
 const SUPABASE_URL = "https://ikprexvsshalwtkpvxdg.supabase.co";
-const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+const SUPABASE_KEY = "sb_publishable_f506hHM7Di4uiLGfSGmKHw_SoDHAuS5";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
