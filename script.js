@@ -241,7 +241,8 @@ async function markAttendance(studentDbId, status) {
 // 10. DISPLAY STUDENTS
 // ==========================================
 
-function displayStudents() {
+displayStudents();
+await loadAttendanceChart();{
     const list = document.getElementById("attendanceList");
     const search = document.getElementById("searchStudent")
         .value.toLowerCase();
