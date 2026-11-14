@@ -9,7 +9,32 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <!-- ADMIN LOGIN -->
+    <section id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">A</div>
+            <h1>Welcome to AttendPro</h1>
+            <p>Sign in to manage student attendance.</p>
+
+            <form id="loginForm" class="login-form">
+                <label for="loginEmail">Email Address</label>
+                <input type="email" id="loginEmail"
+                    placeholder="Enter your email" required>
+
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword"
+                    placeholder="Enter your password" required>
+
+                <button type="submit" class="primary-btn">
+                    Sign In
+                </button>
+                <p id="loginMessage" class="login-message"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- MAIN APPLICATION -->
+    <div class="app-container" id="appContainer" hidden>
 
         <aside class="sidebar">
             <div class="brand">
@@ -44,8 +69,10 @@
                     <div class="avatar">AD</div>
                     <div>
                         <strong>Administrator</strong>
-                        <small>System Manager</small>
+                        <small id="adminEmail">System Manager</small>
                     </div>
+                    <button type="button" id="logoutButton"
+                        class="logout-btn">Logout</button>
                 </div>
             </header>
 
@@ -58,7 +85,6 @@
             </section>
 
             <section class="stats-grid" id="dashboard">
-
                 <div class="stat-card blue">
                     <p>Total Students</p>
                     <h2 id="totalStudents">0</h2>
@@ -82,7 +108,6 @@
                     <h2 id="attendanceRate">0%</h2>
                     <span>Today's attendance</span>
                 </div>
-
             </section>
 
             <section class="content-card" id="students">
@@ -129,7 +154,6 @@
                 <div class="table-controls">
                     <input type="search" id="searchStudent"
                         placeholder="Search student...">
-
                     <input type="date" id="attendanceDate">
                 </div>
 
@@ -144,9 +168,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-
-                        <tbody id="attendanceList">
-                        </tbody>
+                        <tbody id="attendanceList"></tbody>
                     </table>
                 </div>
             </section>
@@ -155,10 +177,9 @@
                 <div class="section-heading">
                     <div>
                         <h2>Attendance Reports</h2>
-                        <p>Summary of today's attendance.</p>
+                        <p>Summary of selected attendance date.</p>
                     </div>
                 </div>
-
                 <div id="reportSummary">
                     No attendance records available yet.
                 </div>
@@ -171,6 +192,8 @@
         </main>
     </div>
 
+    <!-- Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>
