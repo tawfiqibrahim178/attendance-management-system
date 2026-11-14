@@ -15,6 +15,7 @@ const db = window.supabase.createClient(
 // Application data
 let students = [];
 let attendanceRecords = {};
+let attendanceChart = null;
 
 // HTML elements
 const loginScreen = document.getElementById("loginScreen");
