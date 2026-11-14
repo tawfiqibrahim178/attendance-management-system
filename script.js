@@ -160,6 +160,109 @@ async function loadAttendance() {
 }
 
 // ==========================================
+// ATTENDANCE ANALYTICS - LAST 7 DAYS
+// ==========================================
+
+async function loadAttendanceChart() {
+    const canvas = document.getElementById("attendanceChart");
+
+    if (!canvas || !window.Chart) return;
+
+    const dates = [];
+
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+
+        const dateString = [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
+        ].join("-");
+
+        dates.push(dateString);
+    }
+
+    const { data, error } = await db
+        .from("attendance")
+        .select("attendance_date, status")
+        .gte("attendance_date", dates[0])
+        .lte("attendance_date", dates[6]);
+
+    if (error) {
+        console.error("Chart error:", error.message);
+        return;
+    }
+
+    const presentCounts = dates.map(date =>
+        data.filter(record =>
+            record.attendance_date === date &&
+            record.status === "Present"
+        ).length
+    );
+
+    const absentCounts = dates.map(date =>
+        data.filter(record =>
+            record.attendance_date === date &&
+            record.status === "Absent"
+        ).length
+    );
+
+    const labels = dates.map(date =>
+        new Date(date + "T12:00:00").toLocaleDateString(
+            "en-US",
+            { weekday: "short" }
+        )
+    );
+
+    if (attendanceChart) {
+        attendanceChart.destroy();
+    }
+
+    attendanceChart = new Chart(canvas, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Present",
+                    data: presentCounts,
+                    borderColor: "#25c984",
+                    backgroundColor: "rgba(37,201,132,0.12)",
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: "Absent",
+                    data: absentCounts,
+                    borderColor: "#ef646e",
+                    backgroundColor: "rgba(239,100,110,0.10)",
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "top"
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ==========================================
 // 7. REGISTER STUDENT
 // ==========================================
 
